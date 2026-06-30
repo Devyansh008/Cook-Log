@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { StorageService } from '../services/storage';
+import { AuthService } from '../services/auth';
 import type { QuestionEntry, BookCategory } from '../types';
 
 // ─── Default seed books ─────────────────────────────────────────────────────
@@ -46,7 +48,11 @@ function emptyForm(defaultBookId: string): FormState {
   };
 }
 
-export default function Dashboard() {
+interface DashboardProps {
+  user: User;
+}
+
+export default function Dashboard({ user }: DashboardProps) {
   const [books, setBooks]         = useState<BookCategory[]>([]);
   const [questions, setQuestions] = useState<QuestionEntry[]>([]);
   const [form, setForm]           = useState<FormState>(emptyForm(''));
@@ -54,15 +60,16 @@ export default function Dashboard() {
   const [saved, setSaved]         = useState(false);
   const [search, setSearch]       = useState('');
   const [activeTab, setActiveTab] = useState<'problem' | 'solution' | 'explanation'>('problem');
+  const [signingOut, setSigningOut] = useState(false);
 
-  const reload = useCallback(() => {
-    const stored = StorageService.getBooks();
+  const reload = useCallback(async () => {
+    const stored = await StorageService.getBooks();
     const merged = [
       ...SEED_BOOKS.filter(sb => !stored.some(b => b.id === sb.id)),
       ...stored,
     ];
     setBooks(merged);
-    setQuestions(StorageService.getQuestions());
+    setQuestions(await StorageService.getQuestions());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
@@ -100,11 +107,11 @@ export default function Dashboard() {
     setActiveTab('problem');
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.title.trim()) return;
     const entry: QuestionEntry = {
       id: form.id,
-      userId: 'local-user',
+      userId: user.id,
       bookId: form.bookId,
       title: form.title.trim(),
       problemStatement: form.problemStatement,
@@ -112,8 +119,8 @@ export default function Dashboard() {
       solutionExplanation: form.solutionExplanation,
       createdAt: new Date().toISOString(),
     };
-    StorageService.saveQuestion(entry);
-    reload();
+    await StorageService.saveQuestion(entry);
+    await reload();
     setActiveId(form.id);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -208,10 +215,51 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-white/5">
-          <p className="text-[10px] text-gray-700">
+        {/* Sidebar Footer — user info + logout */}
+        <div className="px-4 py-4 border-t border-white/5 space-y-3">
+          {/* Stats */}
+          <p className="text-[10px] text-gray-700 px-1">
             {questions.length} {questions.length === 1 ? 'problem' : 'problems'} saved
           </p>
+
+          {/* User badge */}
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+            {/* Avatar circle with initials */}
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shrink-0 text-[10px] font-bold text-white shadow shadow-violet-500/30">
+              {user.email?.[0]?.toUpperCase() ?? '?'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-medium text-gray-300 truncate">{user.email}</p>
+              <p className="text-[9px] text-gray-600 mt-0.5">Authenticated</p>
+            </div>
+          </div>
+
+          {/* Sign out button */}
+          <button
+            id="btn-sign-out"
+            onClick={async () => {
+              setSigningOut(true);
+              await AuthService.signOut();
+              // App's onAuthStateChange listener will unmount Dashboard automatically
+            }}
+            disabled={signingOut}
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg
+                       text-[11px] font-medium text-gray-500 hover:text-red-400
+                       hover:bg-red-500/10 border border-transparent hover:border-red-500/20
+                       disabled:opacity-40 transition-all duration-200"
+          >
+            {signingOut ? (
+              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            )}
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
         </div>
       </aside>
 
