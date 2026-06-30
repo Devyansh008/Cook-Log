@@ -1,26 +1,8 @@
 import { supabase } from './supabase';
-import type { BookCategory, QuestionEntry } from '../types';
+import type { BookCategory, QuestionEntry, UserProfile } from '../types';
 
-// ─── Storage Service (Supabase backend) ───────────────────────────────────────
-//
-// All function NAMES and PARAMETERS are identical to the previous localStorage
-// version so that Dashboard.tsx and PublicProfile.tsx require zero signature
-// changes — only the addition of `await` at the call-sites.
-//
-// Column-name mapping (snake_case in Postgres ↔ camelCase in TypeScript):
-//
-//  book_categories          question_entries
-//  ─────────────────        ──────────────────────────
-//  id                       id
-//  title                    user_id        → userId
-//  topic                    book_id        → bookId
-//                           title
-//                           problem_statement → problemStatement
-//                           solution_code     → solutionCode
-//                           solution_explanation → solutionExplanation
-//                           created_at        → createdAt
+// ─── Row mappers ──────────────────────────────────────────────────────────────
 
-// Helper: map a raw Supabase row to our BookCategory type
 function rowToBook(row: Record<string, unknown>): BookCategory {
   return {
     id:    row.id    as string,
@@ -29,7 +11,6 @@ function rowToBook(row: Record<string, unknown>): BookCategory {
   };
 }
 
-// Helper: map a raw Supabase row to our QuestionEntry type
 function rowToQuestion(row: Record<string, unknown>): QuestionEntry {
   return {
     id:                  row.id                   as string,
@@ -40,6 +21,15 @@ function rowToQuestion(row: Record<string, unknown>): QuestionEntry {
     solutionCode:        row.solution_code        as string,
     solutionExplanation: row.solution_explanation as string,
     createdAt:           row.created_at           as string,
+  };
+}
+
+function rowToProfile(row: Record<string, unknown>): UserProfile {
+  return {
+    id:          row.id                                    as string,
+    username:    row.username                              as string,
+    displayName: (row.display_name as string) || (row.username as string),
+    bio:         (row.bio          as string) || '',
   };
 }
 
@@ -59,24 +49,18 @@ export const StorageService = {
       console.error('[StorageService] getBooks error:', error.message);
       return [];
     }
-
     return (data ?? []).map(rowToBook);
   },
 
   async saveBook(book: BookCategory): Promise<void> {
     const { error } = await supabase
       .from('book_categories')
-      .upsert(
-        { id: book.id, title: book.title, topic: book.topic },
-        { onConflict: 'id' },
-      );
+      .upsert({ id: book.id, title: book.title, topic: book.topic }, { onConflict: 'id' });
 
-    if (error) {
-      console.error('[StorageService] saveBook error:', error.message);
-    }
+    if (error) console.error('[StorageService] saveBook error:', error.message);
   },
 
-  // ── Questions ──────────────────────────────────────────────────────────────
+  // ── Questions (authenticated user) ────────────────────────────────────────
 
   async getQuestions(): Promise<QuestionEntry[]> {
     const { data, error } = await supabase
@@ -88,7 +72,6 @@ export const StorageService = {
       console.error('[StorageService] getQuestions error:', error.message);
       return [];
     }
-
     return (data ?? []).map(rowToQuestion);
   },
 
@@ -109,8 +92,35 @@ export const StorageService = {
         { onConflict: 'id' },
       );
 
+    if (error) console.error('[StorageService] saveQuestion error:', error.message);
+  },
+
+  // ── Public Profile (no auth required) ─────────────────────────────────────
+
+  /** Look up a public profile by username. Returns null if not found. */
+  async getPublicProfile(username: string): Promise<UserProfile | null> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username)
+      .single();
+
+    if (error || !data) return null;
+    return rowToProfile(data as Record<string, unknown>);
+  },
+
+  /** Fetch all questions for a given userId (uses public RLS policy). */
+  async getPublicQuestions(userId: string): Promise<QuestionEntry[]> {
+    const { data, error } = await supabase
+      .from('question_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
     if (error) {
-      console.error('[StorageService] saveQuestion error:', error.message);
+      console.error('[StorageService] getPublicQuestions error:', error.message);
+      return [];
     }
+    return (data ?? []).map(rowToQuestion);
   },
 };

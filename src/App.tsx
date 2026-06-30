@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import { AuthService } from './services/auth';
 import AuthModal from './components/AuthModal';
 import Dashboard from './pages/Dashboard';
+import PublicProfile from './pages/PublicProfile';
 
-function App() {
+// ─── Auth Gate ────────────────────────────────────────────────────────────────
+// Handles session resolution, auth modal, and renders the Dashboard once signed in.
+
+function AuthGate() {
   const [user, setUser]       = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // wait for session check
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Resolve any existing session immediately
     AuthService.getSession().then(session => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // 2. Keep in sync (e.g. token refresh, tab focus, sign-out)
     const { subscription } = AuthService.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -23,7 +26,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // While resolving the initial session, show a minimal dark splash
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#0d0f14]">
@@ -39,13 +41,27 @@ function App() {
     );
   }
 
-  // Not signed in → show auth modal (full-screen, no dashboard behind it)
   if (!user) {
     return <AuthModal onSuccess={() => { /* auth state change listener handles re-render */ }} />;
   }
 
-  // Signed in → render the dashboard, passing the user down
   return <Dashboard user={user} />;
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public profile — no auth required */}
+        <Route path="/user/:username" element={<PublicProfile />} />
+
+        {/* Everything else — auth gate */}
+        <Route path="/*" element={<AuthGate />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

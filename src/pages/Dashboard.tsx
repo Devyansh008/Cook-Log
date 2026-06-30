@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import { StorageService } from '../services/storage';
 import { AuthService } from '../services/auth';
@@ -61,6 +62,14 @@ export default function Dashboard({ user }: DashboardProps) {
   const [search, setSearch]       = useState('');
   const [activeTab, setActiveTab] = useState<'problem' | 'solution' | 'explanation'>('problem');
   const [signingOut, setSigningOut] = useState(false);
+  const [username, setUsername]     = useState<string | null>(null);
+
+  // Resolve username for the public profile link
+  useEffect(() => {
+    StorageService.getPublicProfile(
+      user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9_]/g, '') ?? ''
+    ).then(prof => { if (prof) setUsername(prof.username); });
+  }, [user]);
 
   const reload = useCallback(async () => {
     const stored = await StorageService.getBooks();
@@ -143,6 +152,25 @@ export default function Dashboard({ user }: DashboardProps) {
               <p className="text-[10px] text-gray-500 leading-none mt-0.5">Problem Editor</p>
             </div>
           </div>
+
+          {/* Public profile link */}
+          {username && (
+            <Link
+              id="link-public-profile"
+              to={`/user/${username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-1.5 mb-4 py-2 px-3 rounded-lg
+                         text-[11px] font-medium text-gray-500 hover:text-violet-300
+                         hover:bg-violet-500/10 border border-transparent hover:border-violet-500/20
+                         transition-all duration-200"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              My Public Profile
+            </Link>
+          )}
 
           <button
             id="btn-new-entry"
