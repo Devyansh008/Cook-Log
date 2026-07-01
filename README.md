@@ -1,11 +1,11 @@
-# CookLog 👨‍🍳🔥 https://cook-log-mmwd.vercel.app/
+# CookLog 👨‍🍳🔥 
 
 A specialized, public notebook web application designed for developers to log their deep-dive problem-solving skills and share a verified portfolio with recruiters. 
 
 CookLog acts as a "meta-portfolio"—the application itself proves full-stack engineering skills, while the content logged inside it proves your algorithmic and problem-solving depth.
 
 ## 🚀 Live Demo
-**[Insert Your Vercel Link Here]**
+**[https://cook-log-mmwd.vercel.app/]**
 
 ## ✨ Core Features
 * **Public Recruiter Profile:** A highly optimized, read-only view of a developer's logged questions accessed via a unique dynamic route (`/user/:username`).
