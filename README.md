@@ -1,32 +1,60 @@
-# React + TypeScript + Vite
+# CookLog 👨‍🍳🔥 https://cook-log-mmwd.vercel.app/
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A specialized, public notebook web application designed for developers to log their deep-dive problem-solving skills and share a verified portfolio with recruiters. 
 
-Currently, two official plugins are available:
+CookLog acts as a "meta-portfolio"—the application itself proves full-stack engineering skills, while the content logged inside it proves your algorithmic and problem-solving depth.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Demo
+**[Insert Your Vercel Link Here]**
 
-## React Compiler
+## ✨ Core Features
+* **Public Recruiter Profile:** A highly optimized, read-only view of a developer's logged questions accessed via a unique dynamic route (`/user/:username`).
+* **Private Developer Dashboard:** A secure, authenticated workspace with markdown-supported forms to log problem statements, titles, and comprehensive code solutions.
+* **Category & Topic Filtering:** Group logged questions by textbooks, topics, or specific domains (e.g., Data Structures, Math, System Design).
+* **Row-Level Security (RLS):** Strict database policies ensuring users can only edit and manage their own logged entries.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
+This project was built using a modern, decoupled Single Page Application (SPA) architecture:
+* **Frontend:** React, TypeScript, Vite
+* **Styling:** Tailwind CSS
+* **Backend & Auth:** Supabase (Postgres Database + GoTrue Authentication)
+* **Hosting/Deployment:** Vercel
+* **Routing:** React Router (v6)
 
-## Expanding the Oxlint configuration
+## 📁 Project Architecture
+* `src/assets/` - Static images and icons
+* `src/components/` - Reusable UI primitives (Buttons, Modals, Cards)
+* `src/pages/` - Core view layouts (`Dashboard.tsx`, `PublicProfile.tsx`)
+* `src/services/` - Storage drivers, Supabase client, and data orchestration
+* `src/types/` - Global TypeScript interfaces ensuring strict type contracts
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 💻 Local Development Setup
+To run this project locally, clone the repository and run the following commands:
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Set up Environment Variables:**
+   Create a `.env` file in the root directory and add your Supabase keys (see `.env.example`):
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_anon_key
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### How to apply this:
+1. Paste that text into your `README.md` file (don't forget to swap in your actual Vercel link at the top!).
+2. Save the file.
+3. Run your standard git commands to push it to your repo:
+   * `git add README.md`
+   * `git commit -m "docs: update README with project overview and tech stack"`
+   * `git push`
+
+Once that is done, your GitHub profile will look incredibly professional to anyone who visits it. Let me know when you've pushed this update, and we can switch gears to figure out that bug in the log!
