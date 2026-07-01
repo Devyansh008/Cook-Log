@@ -48,13 +48,3 @@ To run this project locally, clone the repository and run the following commands
    npm run dev
    ```
 ```
-
-### How to apply this:
-1. Paste that text into your `README.md` file (don't forget to swap in your actual Vercel link at the top!).
-2. Save the file.
-3. Run your standard git commands to push it to your repo:
-   * `git add README.md`
-   * `git commit -m "docs: update README with project overview and tech stack"`
-   * `git push`
-
-Once that is done, your GitHub profile will look incredibly professional to anyone who visits it. Let me know when you've pushed this update, and we can switch gears to figure out that bug in the log!
