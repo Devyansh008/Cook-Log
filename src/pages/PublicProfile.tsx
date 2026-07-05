@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StorageService } from '../services/storage';
+import UserSearch from '../components/UserSearch';
 import type { UserProfile, QuestionEntry, BookCategory } from '../types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -211,7 +212,7 @@ export default function PublicProfile() {
 
       {/* Nav bar */}
       <nav className="sticky top-0 z-10 border-b border-white/5 bg-[#0d0f14]/80 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow shadow-violet-500/30">
               <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -220,7 +221,10 @@ export default function PublicProfile() {
             </div>
             <span className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">CookLog</span>
           </Link>
-          <span className="text-xs text-gray-600 font-mono">@{username}</span>
+          <div className="flex items-center gap-4">
+            <UserSearch />
+            <span className="text-xs text-gray-600 font-mono shrink-0">@{username}</span>
+          </div>
         </div>
       </nav>
 

@@ -109,6 +109,22 @@ export const StorageService = {
     return rowToProfile(data as Record<string, unknown>);
   },
 
+  /** Search public profiles by username or display_name using partial matching. */
+  async searchProfiles(query: string): Promise<UserProfile[]> {
+    if (!query.trim()) return [];
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .or(`display_name.ilike.%${query}%,username.ilike.%${query}%`)
+      .limit(5);
+
+    if (error) {
+      console.error('[StorageService] searchProfiles error:', error.message);
+      return [];
+    }
+    return (data ?? []).map(rowToProfile);
+  },
+
   /** Fetch all questions for a given userId (uses public RLS policy). */
   async getPublicQuestions(userId: string): Promise<QuestionEntry[]> {
     const { data, error } = await supabase
