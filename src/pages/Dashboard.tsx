@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
 import { StorageService } from '../services/storage';
 import { AuthService } from '../services/auth';
+import UserSearch from '../components/UserSearch';
 import type { QuestionEntry, BookCategory } from '../types';
 
 // ─── Default seed books ─────────────────────────────────────────────────────
@@ -306,32 +307,35 @@ export default function Dashboard({ user }: DashboardProps) {
             )}
           </div>
 
-          <button
-            id="btn-save"
-            onClick={handleSave}
-            disabled={!form.title.trim()}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
-              saved
-                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
-                : 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/25'
-            }`}
-          >
-            {saved ? (
-              <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Saved!
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg>
-                {activeId ? 'Update' : 'Save'}
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-6">
+            <UserSearch />
+            <button
+              id="btn-save"
+              onClick={handleSave}
+              disabled={!form.title.trim()}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
+                saved
+                  ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
+                  : 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/25'
+              }`}
+            >
+              {saved ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  {activeId ? 'Update' : 'Save'}
+                </>
+              )}
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto px-8 py-7 space-y-6">
