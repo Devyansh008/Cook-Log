@@ -79,8 +79,8 @@ export default function Dashboard({ user }: DashboardProps) {
       ...stored,
     ];
     setBooks(merged);
-    setQuestions(await StorageService.getQuestions());
-  }, []);
+    setQuestions(await StorageService.getQuestions(user.id));
+  }, [user.id]);
 
   useEffect(() => { reload(); }, [reload]);
 
