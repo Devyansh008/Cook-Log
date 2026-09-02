@@ -107,19 +107,15 @@ WHERE NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = u.id)
 ON CONFLICT (id) DO NOTHING;
 
 
--- ─── 4. Make question_entries publicly readable ───────────────────────────────
+-- ─── 4. Enforce strict RLS on question_entries ───────────────────────────────
 --
--- The existing "questions: owner can read" policy only lets a user read their
--- own rows. For the public profile page to display another user's problems,
--- we need a permissive SELECT that works for unauthenticated visitors too.
---
--- Drop the restrictive owner-only read policy and replace with public read.
+-- Ensure question_entries is strictly protected per authenticated user.
 
+DROP POLICY IF EXISTS "questions: public read" ON public.question_entries;
 DROP POLICY IF EXISTS "questions: owner can read" ON public.question_entries;
 
-CREATE POLICY "questions: public read"
+CREATE POLICY "questions: owner can read"
   ON public.question_entries
   FOR SELECT
-  USING (true);
-
--- Write policies (INSERT / UPDATE / DELETE) remain owner-only — unchanged.
+  TO authenticated
+  USING (auth.uid() = user_id);

@@ -62,10 +62,12 @@ export const StorageService = {
 
   // ── Questions (authenticated user) ────────────────────────────────────────
 
-  async getQuestions(): Promise<QuestionEntry[]> {
+  async getQuestions(userId: string): Promise<QuestionEntry[]> {
+    if (!userId) return [];
     const { data, error } = await supabase
       .from('question_entries')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
